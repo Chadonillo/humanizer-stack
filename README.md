@@ -7,6 +7,11 @@ Most humanizers only fix words. That is the easy half, and it is the half that i
 decaying fastest. This repo pairs a surface pass with a structural pass, because the
 research says structure is where the durable fingerprint lives.
 
+> **Free community.** I build tools like this in the open inside the
+> [Jens AI Community](https://www.skool.com/jens-ai-community-1306), a free Skool group
+> for putting AI to work in your business. If this repo is useful to you, come join us:
+> https://www.skool.com/jens-ai-community-1306
+
 ## Why two passes
 
 The [StoryScope study](https://github.com/jenna-russell/storyscope) (Russell et al.,
