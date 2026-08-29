@@ -245,15 +245,19 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 ## STYLE PATTERNS
 
-### 13. Em Dash Overuse
+### 13. Dash Punctuation Overuse
 
-**Problem:** LLMs use em dashes (—) more than humans, mimicking "punchy" sales writing.
+**Problem:** LLMs use em dashes (—), en dashes (–), and spaced ASCII hyphens (`word - word`) as interchangeable rhythm shortcuts. Replacing one dash character with another does not fix the sentence.
+
+For outward-facing prose in this stack, remove sentence-level dash punctuation in both regular and deep humanization. Rewrite with a comma, period, semicolon, or parentheses according to the grammar. Do not automatically replace the dash with a colon.
+
+Preserve legitimate compound-word hyphens (`well-known`, `18th-century`), numeric ranges (`10-12`, `2024–2026`), minus signs, identifiers, command flags, URLs, code, Markdown list markers, exact quotations, and official names.
 
 **Before:**
-> The term is primarily promoted by Dutch institutions—not by the people themselves. You don't say "Netherlands, Europe" as an address—yet this mislabeling continues—even in official documents.
+> The term is promoted by Dutch institutions—not by the people themselves. The label looks neutral – it is not. The archive confirms it - the local records use another name.
 
 **After:**
-> The term is primarily promoted by Dutch institutions, not by the people themselves. You don't say "Netherlands, Europe" as an address, yet this mislabeling continues in official documents.
+> Dutch institutions promote the term, but the people themselves do not. The label looks neutral, but it is not. The archive confirms that local records use another name.
 
 ---
 
@@ -412,7 +416,15 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
    - Uses specific details over vague claims
    - Maintains appropriate tone for context
    - Uses simple constructions (is/are/has) where appropriate
-5. Present the humanized version
+5. Run the `no-ai-slop` skill as the second surface-quality pass. It is mandatory for both regular and deep humanization and owns faux-insight setups, colon reveals, dramatic fragments, formatting slop, and the final dash-and-hyphen policy.
+6. Run `python3 scripts/copy_scan.py <file>` for file-based output. Fix every genuine `copy-dash-break` finding without damaging compounds, ranges, code, URLs, flags, identifiers, Markdown, quotations, or official names.
+7. For deep humanization, continue to `structural-humanizer` after the `no-ai-slop` pass, then run the surface scanner once more because structural rewriting can reintroduce punctuation tells.
+8. Present the humanized version
+
+## Stack modes
+
+- **Regular:** `humanizer` -> `no-ai-slop`
+- **Deep:** `humanizer` -> `no-ai-slop` -> `structural-humanizer`
 
 ## Output Format
 
@@ -459,13 +471,15 @@ python3 scripts/copy_scan.py <file>     # from the repo root
 
 This skill fixes words, phrasing, and punctuation. It does not fix structure.
 
-Structural tells survive a surface pass almost entirely intact: professional span-level
+Structural tells survive surface editing almost entirely intact: professional span-level
 rewriting moved AI detection by only 1.6 points in the StoryScope study, while
-structure alone detects AI text at 93.2% F1. After this pass, run
+structure alone detects AI text at 93.2% F1. After this pass, always run
+**`no-ai-slop`** as the second surface-quality gate. For deep humanization, then run
 **`structural-humanizer`** for stated lessons, tidy arcs, embodied-emotion performance,
 vague reference, and shape convergence.
 
-Surface pass first, structural pass second. See `docs/PIPELINE.md`.
+Regular mode uses two surface passes. Deep mode adds the structural pass. See
+`docs/PIPELINE.md`.
 
 ---
 

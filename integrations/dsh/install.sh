@@ -13,10 +13,15 @@ install_skill() {
   mkdir -p "$AGENT_SKILLS"
   cp -a "$src" "$staged"
   mkdir -p "$staged/scripts"
-  if [[ "$skill" == humanizer ]]; then
+  if [[ "$skill" == humanizer || "$skill" == no-ai-slop ]]; then
     cp "$REPO/scripts/copy_scan.py" "$staged/scripts/"
   fi
-  cp "$REPO/LICENSE" "$REPO/ATTRIBUTION.md" "$staged/"
+  if [[ "$skill" == no-ai-slop ]]; then
+    cp "$REPO/LICENSE" "$staged/STACK-LICENSE"
+    cp "$REPO/ATTRIBUTION.md" "$staged/"
+  else
+    cp "$REPO/LICENSE" "$REPO/ATTRIBUTION.md" "$staged/"
+  fi
   chmod +x "$staged/scripts/"*.py 2>/dev/null || true
   if [[ -e "$dst" || -L "$dst" ]]; then
     mv "$dst" "$dst.bak.$STAMP"
@@ -31,6 +36,7 @@ install_skill() {
 }
 
 install_skill humanizer
+install_skill no-ai-slop
 install_skill structural-humanizer
 install -D -m 0644 "$REPO/integrations/dsh/outward-humanizer-policy.mjs" \
   "$DSH_HOME_DIR/humanizer-policy.mjs"
@@ -38,6 +44,7 @@ install -D -m 0644 "$REPO/integrations/dsh/outward-humanizer-policy.mjs" \
 cat <<EOF
 Installed skills:
   $AGENT_SKILLS/humanizer
+  $AGENT_SKILLS/no-ai-slop
   $AGENT_SKILLS/structural-humanizer
 Installed DSH policy plugin:
   $DSH_HOME_DIR/humanizer-policy.mjs

@@ -7,10 +7,13 @@ narrowed to the four mechanical copy rules and adapted for prose files
 
 Catches the pattern-matchable slice of the surface layer:
 
-  copy-em-dash      em dash in visible copy (the #1 cited writing tell, 7.1%)
+  copy-dash-break   em dash, en dash, or spaced hyphen used as sentence punctuation
   copy-antithesis   "it's not just X, it's Y" / "not only X but Y" (2.8%)
   hype-copy         marketing cliche vocabulary
   copy-servile      sycophantic openers and signposted wrap-ups
+  copy-faux-insight throat-clearing and "what nobody tells you" setups
+  copy-colon-reveal noun-phrase + lowercase reveal used for fake drama
+  copy-fragment     stock dramatic fragments and fake-profound kickers
 
 The cadence tells (uniform sentence rhythm, formulaic shape, polished-but-empty)
 are NOT catchable here. See references/copy-tells.md and run the structural pass.
@@ -33,12 +36,22 @@ import sys
 
 RULES = [
     {
-        "id": "copy-em-dash",
-        "label": "Em dash in copy (the #1 'AI wrote this' writing tell)",
-        "fix": "Use a comma, a period, or parentheses. Not a colon; that gets flagged too.",
-        "pats": [r"\w\s*—\s*\w", r"\w\s*&mdash;\s*\w"],
-        # Skip code, code comments, and fenced blocks: not user-facing copy.
-        "suppress": r"^\s*(\*|//|/\*|<!--|#|>|\||```)|`[^`]*—[^`]*`",
+        "id": "copy-dash-break",
+        "label": "Dash character used as sentence-level punctuation",
+        "fix": (
+            "Rewrite with a comma, period, semicolon, or parentheses. Preserve "
+            "compound-word hyphens, ranges, minus signs, flags, identifiers, URLs, code, "
+            "Markdown list markers, quotations, and official names."
+        ),
+        "pats": [
+            r"[A-Za-z0-9][ \t]*(?:—|&mdash;)[ \t]*[A-Za-z0-9]",
+            r"[A-Za-z][ \t]+(?:–|&ndash;)[ \t]+[A-Za-z]",
+            r"[A-Za-z][ \t]+-[ \t]+[A-Za-z]",
+        ],
+        # Skip exact quotations, code comments, tables, and fenced-code markers. A
+        # Markdown list marker is safe because each pattern requires a letter or digit
+        # on both sides, so visible prose inside list items is still checked.
+        "suppress": r"^\s*(//|/\*|<!--|>|\||```)",
     },
     {
         "id": "copy-antithesis",
@@ -73,6 +86,37 @@ RULES = [
             r"\bIn conclusion\b", r"\bIn summary\b",
         ],
     },
+    {
+        "id": "copy-faux-insight",
+        "label": "Throat-clearing or faux-insight setup",
+        "fix": "Delete the setup and state the supported claim directly.",
+        "pats": [
+            r"\bHere'?s the thing\b", r"\bLet me be clear\b",
+            r"\bHere'?s what nobody tells you\b", r"\bWhat nobody tells you\b",
+            r"\bThe part everyone misses\b", r"\bWhat most people get wrong\b",
+            r"\bThe uncomfortable truth is\b", r"\bPlot twist\b",
+            r"\bWhat if I told you\b", r"\bThink about it\s*:",
+        ],
+    },
+    {
+        "id": "copy-colon-reveal",
+        "label": "Colon used for a lowercase dramatic reveal",
+        "fix": "Rewrite as a normal sentence. Keep colons for real lists, labels, and quotations.",
+        "pats": [
+            r"\b(?:the\s+)?(?:best|hardest|wildest|important|key|real)\s+(?:part|thing|point|reason|detail)\s*:\s+[a-z]",
+            r"\b(?:the\s+)?(?:secret|truth|reality|answer|result)\s*:\s+[a-z]",
+        ],
+    },
+    {
+        "id": "copy-fragment",
+        "label": "Stock dramatic fragment or fake-profound kicker",
+        "fix": "Use one complete direct sentence or delete the decorative kicker.",
+        "pats": [
+            r"\bThat'?s it\.\s+That'?s the whole thing\b",
+            r"\bThe future isn'?t coming\.\s+It'?s already here\b",
+            r"\bNot a\b[^.!?]{1,45}\.\s*\bNot a\b[^.!?]{1,45}\.\s*\bA\b",
+        ],
+    },
 ]
 
 TAG_RE = re.compile(r"<[^>]+>")
@@ -94,16 +138,26 @@ def strip_html(text):
     return html_mod.unescape(TAG_RE.sub(" ", text))
 
 
+def mask_inline_code(line):
+    """Blank inline-code spans without shifting line offsets."""
+    return re.sub(r"`[^`]*`", lambda m: " " * len(m.group(0)), line)
+
+
 def scan(text, rules, path):
     hits = []
+    in_fence = False
     for lineno, line in enumerate(text.splitlines(), 1):
-        if "copy-ignore" in line:
+        if line.lstrip().startswith("```"):
+            in_fence = not in_fence
             continue
+        if in_fence or "copy-ignore" in line:
+            continue
+        visible_line = mask_inline_code(line)
         for rule in rules:
-            if rule["suppress_re"] and rule["suppress_re"].search(line):
+            if rule["suppress_re"] and rule["suppress_re"].search(visible_line):
                 continue
             for pat in rule["re"]:
-                m = pat.search(line)
+                m = pat.search(visible_line)
                 if m:
                     hits.append({
                         "file": path,
@@ -111,7 +165,7 @@ def scan(text, rules, path):
                         "id": rule["id"],
                         "label": rule["label"],
                         "fix": rule["fix"],
-                        "match": m.group(0).strip()[:80],
+                        "match": line[m.start():m.end()].strip()[:80],
                         "text": line.strip()[:120],
                     })
                     break

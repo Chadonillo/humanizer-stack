@@ -14,10 +14,15 @@ install_skill() {
   mkdir -p "$SKILLS_ROOT"
   cp -a "$src" "$staged"
   mkdir -p "$staged/scripts"
-  if [[ "$skill" == humanizer ]]; then
+  if [[ "$skill" == humanizer || "$skill" == no-ai-slop ]]; then
     cp "$REPO/scripts/copy_scan.py" "$staged/scripts/"
   fi
-  cp "$REPO/LICENSE" "$REPO/ATTRIBUTION.md" "$staged/"
+  if [[ "$skill" == no-ai-slop ]]; then
+    cp "$REPO/LICENSE" "$staged/STACK-LICENSE"
+    cp "$REPO/ATTRIBUTION.md" "$staged/"
+  else
+    cp "$REPO/LICENSE" "$REPO/ATTRIBUTION.md" "$staged/"
+  fi
   chmod +x "$staged/scripts/"*.py 2>/dev/null || true
   if [[ -e "$dst" || -L "$dst" ]]; then
     mv "$dst" "$dst.bak.$STAMP"
@@ -26,6 +31,7 @@ install_skill() {
 }
 
 install_skill humanizer
+install_skill no-ai-slop
 install_skill structural-humanizer
 install -D -m 0755 "$REPO/integrations/hermes/outward-humanizer-policy.py" \
   "$HOOK_ROOT/outward-humanizer-policy.py"
@@ -33,6 +39,7 @@ install -D -m 0755 "$REPO/integrations/hermes/outward-humanizer-policy.py" \
 cat <<EOF
 Installed skills:
   $SKILLS_ROOT/humanizer
+  $SKILLS_ROOT/no-ai-slop
   $SKILLS_ROOT/structural-humanizer
 Installed hook:
   $HOOK_ROOT/outward-humanizer-policy.py

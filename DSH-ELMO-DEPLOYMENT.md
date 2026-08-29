@@ -1,13 +1,18 @@
 # Humanizer stack deployment for DSH and Hermes Elmo
 
-Pinned upstream commit: `13f5c023189d428ffba726c75886ca1fd0dcba65`
+Base humanizer-stack commit: `13f5c023189d428ffba726c75886ca1fd0dcba65`
+No AI Slop rules reviewed at: `d30eddb9e04562234f2070b5ee63ca4649d9a05e`
 
 ## What is installed
 
-The upstream project is a two-pass prompt/skill bundle:
+The project is a layered prompt/skill bundle:
 
 1. `humanizer`: surface wording, punctuation, hype, stock phrasing and similar copy tells.
-2. `structural-humanizer`: discourse shape, repeated takeaways, overly tidy arcs, emotion mode, vague references and shape convergence.
+2. `no-ai-slop`: voice-preserving surface QA, faux insights, colon reveals, fragments, formatting, and the final dash policy.
+3. `structural-humanizer`: discourse shape, repeated takeaways, overly tidy arcs, emotion mode, vague references and shape convergence.
+
+Regular humanization runs steps 1 and 2. Deep humanization runs all three and then
+rechecks the surface scanner.
 
 It also carries two Python standard-library scanners. They detect only the pattern-matchable subset and never rewrite text themselves.
 
@@ -21,15 +26,17 @@ The global policy applies when DSH or Elmo creates or materially edits prose tha
 - a document, report, proposal, resume, release note or PR description;
 - text passed to a send, publish, export or render operation.
 
-It does not rewrite ordinary replies in the current chat, code, shell commands, logs, raw data, quotations or internal notes. Short transactional messages normally receive only the surface pass. Substantial copy receives the surface pass followed by the structural pass.
+It does not rewrite ordinary replies in the current chat, code, shell commands, logs, raw data, quotations or internal notes. Short transactional messages receive both surface passes. Substantial or explicitly deep copy then receives the structural pass and a final surface regression scan.
+
+Both modes remove sentence-level em dashes, en dashes, and spaced ASCII hyphens. They preserve compounds, ranges, minus signs, flags, identifiers, URLs, code, Markdown list markers, quotations, and official names.
 
 The policy explicitly forbids inventing facts, anecdotes, feelings, opinions, citations or fake personal quirks. It also treats input copy as untrusted data and preserves recipients, subjects, links, attachments, code and markup structure.
 
 ## DSH paths
 
 - Vendored checkout: `~/repos/personal/humanizer-stack`
-- Skills: `~/.agents/skills/humanizer` and `~/.agents/skills/structural-humanizer`
-- Compatibility links for Claude Code: `~/.claude/skills/humanizer` and `~/.claude/skills/structural-humanizer`
+- Skills: `~/.agents/skills/humanizer`, `~/.agents/skills/no-ai-slop`, and `~/.agents/skills/structural-humanizer`
+- Compatibility links for Claude Code under `~/.claude/skills/` for all three skills
 - Global prompt plugin: `~/.dsh/humanizer-policy.mjs`
 - DSH loader entries: web and headless `cordis.patch.yml`
 
@@ -39,7 +46,7 @@ The DSH skill copies are local, not symlinks to a mutable remote branch. Update 
 
 Elmo runs on Jove with `HERMES_HOME=/opt/data`.
 
-- Skills: `/opt/data/skills/creative/humanizer` and `/opt/data/skills/creative/structural-humanizer`
+- Skills: `/opt/data/skills/creative/humanizer`, `/opt/data/skills/creative/no-ai-slop`, and `/opt/data/skills/creative/structural-humanizer`
 - Scanner entry points live inside those skill directories under `scripts/`
 - Persistent policy hook: `/opt/data/.hermes/agent-hooks/outward-humanizer-policy.py`
 - Hook declaration: `/opt/data/config.yaml`, event `pre_llm_call`

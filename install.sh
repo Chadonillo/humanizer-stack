@@ -9,7 +9,7 @@
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SKILLS=(humanizer structural-humanizer)
+SKILLS=(humanizer no-ai-slop structural-humanizer)
 MODE=link
 TARGET="$HOME/.claude/skills"
 FORCE=0

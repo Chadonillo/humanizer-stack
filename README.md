@@ -1,6 +1,6 @@
 # humanizer-stack
 
-A two-pass pipeline for removing the signs of AI writing from outward-facing text,
+A layered pipeline for removing the signs of AI writing from outward-facing text,
 packaged as [Claude Code Skills](https://code.claude.com/docs/en/skills).
 
 Most humanizers only fix words. That is the easy half, and it is the half that is
@@ -28,7 +28,8 @@ Meanwhile the surface layer is eroding on its own. GPT 5.4 already cut its em-da
 usage sharply, and fine-tuning drops stylistic detection from 97% to 3%. Word-level
 tells are a moving target. Structural tells require structural rewrites.
 
-So: pass 1 fixes the words. Pass 2 fixes the shape. Run them in that order.
+So: the surface passes fix the words and sentence-level habits. Deep mode then fixes
+the shape.
 
 ## What is in here
 
@@ -37,7 +38,10 @@ skills/
   humanizer/                     Pass 1: words and phrasing
     SKILL.md
     references/copy-tells.md     Copy-specific tells (em dash, hype vocab, antithesis)
-  structural-humanizer/          Pass 2: discourse structure
+  no-ai-slop/                    Pass 2: voice-preserving surface quality gate
+    SKILL.md
+    eval.md                      Semantic post-edit checklist
+  structural-humanizer/          Pass 3 (deep mode): discourse structure
     SKILL.md
     references/
       storyscope-findings.md     The study distilled: 30 core features with rates
@@ -59,7 +63,19 @@ vocabulary, negative parallelism. Built from Wikipedia's
 The `copy-tells.md` reference adds the tells that show up specifically in public copy,
 ranked by a 3.2M-post Reddit analysis of what people actually flag.
 
-### Pass 2: `structural-humanizer`
+### Pass 2: `no-ai-slop`
+
+The second surface pass preserves the writer's voice while catching faux-insight
+setups, colon reveals, dramatic fragments, fake-profound endings, formatting slop, and
+sentence-level dash punctuation. It is adapted from
+[petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) (MIT).
+
+Both regular and deep humanization use this pass. The stack removes em dashes, en
+dashes used as prose breaks, and spaced ASCII hyphens used the same way. It preserves
+compound-word hyphens, numeric ranges, minus signs, flags, identifiers, URLs, code,
+Markdown list markers, quotations, and official names.
+
+### Pass 3 in deep mode: `structural-humanizer`
 
 Six audits run one at a time, because aspect-based checking found 95% of issues in the
 study's own pipeline against 68% for a single combined pass:
@@ -94,11 +110,12 @@ cd humanizer-stack
 ./install.sh
 ```
 
-This symlinks both skills into `~/.claude/skills/`, so updates land with a `git pull`.
+This symlinks all three skills into `~/.claude/skills/`, so updates land with a `git pull`.
 Pass `--copy` if you would rather have independent copies than symlinks.
 
-To install manually, copy `skills/humanizer` and `skills/structural-humanizer` into
-`~/.claude/skills/` (user-level) or `.claude/skills/` (project-level).
+To install manually, copy `skills/humanizer`, `skills/no-ai-slop`, and
+`skills/structural-humanizer` into `~/.claude/skills/` (user-level) or
+`.claude/skills/` (project-level).
 
 ## Use
 
@@ -110,8 +127,8 @@ de-slop this lesson
 run the structural pass on draft.md
 ```
 
-Run the surface pass first, then the structural pass. `docs/PIPELINE.md` covers the
-order and what each layer owns.
+Regular mode runs `humanizer` then `no-ai-slop`. Deep mode runs those same passes and
+then `structural-humanizer`. `docs/PIPELINE.md` covers the order and ownership.
 
 ### Scanners
 
@@ -127,7 +144,9 @@ python3 scripts/copy_scan.py --strict draft.md    # exit 1 on any hit
 cat draft.md | python3 scripts/copy_scan.py -     # stdin
 ```
 
-Mark a line `copy-ignore` to suppress an intentional usage.
+Mark a line `copy-ignore` to suppress an intentional usage. The scanner distinguishes
+sentence breaks from protected compound hyphens, ranges, code, URLs, flags, identifiers,
+and Markdown list markers.
 
 ## Honest limits
 
@@ -145,8 +164,9 @@ Mark a line `copy-ignore` to suppress an intentional usage.
 ## Attribution
 
 Built on work by [@blader](https://github.com/blader/humanizer) (MIT),
-[jcarterjohnson](https://github.com/jcarterjohnson/vibecoded-design-tells) (MIT), and
-Wikipedia's WikiProject AI Cleanup (CC BY-SA 4.0). Grounded in Russell et al. 2026.
+[jcarterjohnson](https://github.com/jcarterjohnson/vibecoded-design-tells) (MIT),
+[Peter Yang](https://github.com/petergyang/no-ai-slop) (MIT), and Wikipedia's
+WikiProject AI Cleanup (CC BY-SA 4.0). Grounded in Russell et al. 2026.
 
 Full breakdown with license obligations: [ATTRIBUTION.md](ATTRIBUTION.md).
 

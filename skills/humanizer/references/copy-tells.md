@@ -15,16 +15,19 @@ complaint posts.
 
 Run `python3 scripts/copy_scan.py <file>` to flag them.
 
-### 1. The em dash (7.1%, the single most-cited writing tell)
+### 1. Sentence-level dash punctuation (em dash: 7.1%, the single most-cited writing tell)
 
 On visible copy the em dash reads as "a machine wrote this." It is the highest-signal
-writing tell in the entire dataset, above any vocabulary word.
+writing tell in the entire dataset, above any vocabulary word. The same cadence remains
+when the character is swapped for an en dash or a spaced ASCII hyphen.
 
-**Fix:** use a comma, a period, or parentheses. Do not simply substitute a colon,
-because readers flag that too as the same reflex wearing a different hat.
+**Fix:** use a comma, period, semicolon, or parentheses according to the sentence. Do
+not simply substitute a colon, because readers flag that too as the same reflex wearing
+a different hat.
 
-**Exception:** an em dash inside code, a code comment, or a technical spec is not
-user-facing copy. The scanner suppresses those.
+**Preserve:** compound-word hyphens, numeric ranges, minus signs, identifiers, command
+flags, URLs, code, Markdown list markers, exact quotations, and official names. The
+scanner targets only sentence-level dash breaks and suppresses common syntax contexts.
 
 ### 2. "It's not just X, it's Y" (2.8%)
 
@@ -77,12 +80,13 @@ de-slopped. It has been sanded.
 | Layer | Skill | Catches |
 |---|---|---|
 | Words and phrasing | `humanizer` | Vocabulary, punctuation, negative parallelism, rule of three |
-| Copy specifically | this file | Em dash, antithesis cadence, hype vocab, sycophancy |
+| Surface quality gate | `no-ai-slop` | Faux insights, colon reveals, fragments, formatting slop, dash policy |
+| Copy specifically | this file | Dash breaks, antithesis cadence, hype vocab, sycophancy |
 | Discourse structure | `structural-humanizer` | Stated lessons, tidy arcs, embodied emotion, vague reference |
 
-Copy tells belong to pass 1 because they are word-level and mechanically checkable.
-Structure is a separate job. A page can pass every check here and still be detectable
-from its shape alone.
+Copy tells belong to the surface passes because they are word-level and mechanically
+checkable. Structure is a separate job. A page can pass every check here and still be
+detectable from its shape alone.
 
 ## Source
 

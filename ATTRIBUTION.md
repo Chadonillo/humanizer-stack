@@ -11,7 +11,8 @@ obligations travel with it.
 | `skills/humanizer/SKILL.md` | [blader/humanizer](https://github.com/blader/humanizer) | MIT | Keep copyright and license notice |
 | ...its underlying pattern catalog | [Wikipedia:Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) | CC BY-SA 4.0 | Attribute and share alike |
 | `skills/humanizer/references/copy-tells.md` | [jcarterjohnson/vibecoded-design-tells](https://github.com/jcarterjohnson/vibecoded-design-tells) | MIT | Keep copyright and license notice |
-| `scripts/copy_scan.py` | same as above (`devibe_scan.py`) | MIT | Keep copyright and license notice |
+| `scripts/copy_scan.py` | same as above (`devibe_scan.py`), with clean-room additions informed by `petergyang/no-ai-slop` | MIT | Keep copyright and license notices |
+| `skills/no-ai-slop/**` | [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) | MIT | Keep Peter Yang's copyright and license notice |
 | `skills/structural-humanizer/**` | original work, this repo | MIT | Cite the paper below if you build on it |
 | StoryScope findings | Russell et al. 2026, arXiv:2604.03136 | academic citation | Cite, do not relicense |
 
@@ -52,7 +53,23 @@ comments from 125 canonical threads. The harvested Reddit text itself belongs to
 its original authors and is **not** redistributed here. Only the derived findings
 are included.
 
-## 3. structural-humanizer (original work)
+## 3. No AI Slop additions (MIT)
+
+`skills/no-ai-slop/**` adapts the editing workflow and pattern categories from
+[petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop), reviewed at commit
+`d30eddb9e04562234f2070b5ee63ca4649d9a05e` and released under the MIT License.
+
+The adapted skill keeps the minimum-effective-edit and voice-preservation approach,
+plus pattern categories such as faux-insight setups, colon reveals, interpretive
+metadiscourse, rhetorical setups, dramatic fragments, formatting slop, and the
+post-edit evaluation loop. This stack intentionally overrides the upstream dash policy:
+regular and deep modes remove sentence-level em dashes, en dashes, and spaced ASCII
+hyphens while preserving compounds, ranges, code, URLs, identifiers, syntax,
+quotations, and official names.
+
+Peter Yang's complete MIT notice is preserved in `skills/no-ai-slop/LICENSE`.
+
+## 4. structural-humanizer (original work)
 
 `skills/structural-humanizer/**` is original work written for this repository.
 It is grounded in, but does not reproduce, the following paper:
@@ -71,7 +88,7 @@ The transfer caveat is stated in the skill itself and repeated here: StoryScope
 studied roughly 5,000-word fiction. Applying it to short nonfiction is an
 inference, not a result the paper establishes.
 
-## 4. Wikipedia notice (CC BY-SA 4.0)
+## 5. Wikipedia notice (CC BY-SA 4.0)
 
 Portions of `skills/humanizer/SKILL.md` derive from
 "Wikipedia:Signs of AI writing", available under the

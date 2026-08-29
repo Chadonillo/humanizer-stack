@@ -7,17 +7,18 @@ description: >-
   references, unbroken linear structure, and shape convergence across pieces. Grounded
   in the StoryScope study (Russell et al. 2026): narrative structure alone detects AI
   text at 93.2% F1, and professional stylistic rewriting moved detection only 1.6
-  points. Use as the SECOND pass after the humanizer skill (which handles words and
-  phrasing) whenever writing or revising LinkedIn posts, course lessons, blog posts,
+  points. Use as the structural pass after the `humanizer` and `no-ai-slop` surface
+  passes whenever writing or revising LinkedIn posts, course lessons, blog posts,
   essays, newsletters, or emails that must read as human. Triggers: "humanize",
   "de-slop", "AI tells", "make this sound human", "structural pass", "deep humanize".
 ---
 
 # structural-humanizer
 
-Read this first. The `humanizer` skill fixes words: "delve", em dashes, rule of three,
-negative parallelism. This skill fixes what survives that pass: the structure. The two
-are different jobs, run in sequence. Surface pass first, structural pass second.
+Read this first. The `humanizer` skill fixes words and common sentence patterns.
+`no-ai-slop` runs next as the surface quality gate, including the final dash-and-hyphen
+check. This skill fixes what survives both surface passes: the structure. Deep mode is
+`humanizer` -> `no-ai-slop` -> `structural-humanizer`.
 
 **Why this layer matters more.** StoryScope (Russell et al. 2026, arXiv:2604.03136)
 classified 61,608 stories from humans and 5 LLMs using only discourse-level features,
@@ -103,6 +104,10 @@ break the pattern before publishing.
    slice (embodied-emotion cliches, takeaway markers, vague allusions, uniformity).
 6. **Re-check for the trap.** If the fix looks like the fix you applied yesterday,
    vary it.
+7. **Re-run the surface gate.** Structural rewriting can introduce fresh em dashes,
+   en dashes, spaced hyphens, colon reveals, or fragments. Run `copy_scan.py` again
+   and fix genuine findings while preserving compounds, ranges, code, URLs, flags,
+   identifiers, Markdown, quotations, and official names.
 
 ## Intervention menu (rotate, never all at once)
 
@@ -134,8 +139,8 @@ Gemini produces the tidiest endings; kill the bow on top.
 
 ## What this skill does not do
 
-It does not fix vocabulary or punctuation (run `humanizer`). It does not impose a
-voice (that is `jens-blog-writer` / `solo-scale-writer` / the Nick Saraev templates).
+It does not fix vocabulary or punctuation (run `humanizer` and `no-ai-slop`). It does
+not impose a voice (that is `jens-blog-writer` / `solo-scale-writer` / the Nick Saraev templates).
 It does not make text undetectable; nothing does. And one honest caveat: StoryScope
 studied ~5,000-word fiction. The transfer to short nonfiction is an inference, but the
 core pattern (over-explanation, tidiness, linearity, convergence to one default shape)
